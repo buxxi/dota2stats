@@ -1,0 +1,5 @@
+API_KEY = ''
+SQL_HOST = 'localhost'
+SQL_USER = ''
+SQL_PASSWORD = ''
+SQL_DB = ''

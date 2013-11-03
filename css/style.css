@@ -1,0 +1,147 @@
+html, body {
+	margin : 0;
+	padding : 0;
+	width : 100%;
+	height : 100%;
+	background : #020C0E;
+	font-family : "Avant Garde";
+}
+
+#gui {
+	float : left;
+	width : 20%;
+	margin-top : 30px;
+}
+
+#chart,#table {
+	float : left;
+	width : 80%;
+	top : 30px;
+	bottom : 0;
+	right : 0;
+	position : absolute;
+	overflow : hidden;
+}
+
+#table {
+	display : none;
+	overflow : auto;
+}
+
+#table th {
+	background : #1A1A1A;
+	cursor : pointer;
+}
+
+#table td, #table th {
+	color : white;
+	width : 150px;
+	font-size : 0.8em;
+	border : 1px solid #2C2C2C;
+	padding : 2px;
+
+	outline: medium none;
+	text-align: center; 
+	font-weight: bold; 
+	text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.7);
+}
+
+#table .linkcol {
+	width : 16px;
+}
+
+#table table {
+	margin : 20px;
+	border-collapse : collapse;
+}
+
+#tooltip {
+	position : absolute;
+	z-index : 2;
+        border : 1px solid #666;
+        font-size : 0.8em;
+        background-color : #fff;
+        padding : 3px;
+}
+
+#loading {
+	left : 50%;
+	position : absolute;
+	top : 50%;
+	padding : 30px;
+	background : #111111;
+	border : #2C2C2C;
+	color : #FFFFFF;
+	width : 300px;
+	margin-left : -150px;
+}
+
+#menu {
+	position : fixed;
+	width : 100%;
+	background : #111111;
+	border-bottom : 1px solid #6DAB14;
+	height : 25px;
+}
+
+#menu ul {
+	list-style : none;
+	margin : 0;
+	padding : 0;	
+}
+
+#menu ul li {
+	padding-top : 3px;
+	cursor : pointer;
+	height : 25px;
+	padding : 0px 10px;
+	display : inline-block;
+	float : left;
+}
+
+#menu ul li.active {
+	font-size : 1.2em;
+	font-weight : bold;
+	background-color : #6DAB14;
+}
+
+#menu a {
+	font-size : 0.8em;
+	color : #FFFFFF;
+	text-decoration : none;
+}
+
+.dg {
+	font : 11px "Avant Garde" !important;
+	width : auto !important;	
+}
+
+.main ul li, .folder ul li, .cr ul li {
+	border : 1px solid #2C2C2C;
+}
+
+.dg .close-button {
+	display : none;
+	width : 20% !important;
+}
+
+.dg li:not(.folder) {
+	background : #020C0E !important;
+}
+
+.dg li.title {
+	font-weight : bold;
+	background : url("data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==") no-repeat scroll 6px 10px #121B1D !important;
+}
+
+.dg .number .c input {
+	color : #6DAB14 !important;
+}
+
+.dg .c .slider-fg {
+	background : #6DAB14 !important;
+}
+
+.tickLabel {
+	color : #A5AEAE !important;
+}
