@@ -10,77 +10,92 @@ define("data-container", ["jquery", "palette"], function() {
 			"kills" : { 
 				calc : function(node) { return node.kills; },
 				format : normalFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"kills+assist" : {
 				calc : function(node) { return node.kills + node.assists; },
 				format : normalFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"kills/death" : {
 				calc : function(node) { return [node.kills, node.deaths] },
 				format : normalFormat,
-				sum : averageSum
+				sum : averageSum,
+				unique : true				
 			},
 			"kills+assist/death" : {
 				calc : function(node) { return [node.kills + node.assists, node.deaths]; },
 				format : normalFormat,
-				sum : averageSum
+				sum : averageSum,
+				unique : true
 			},
 			"gold" :  { 
 				calc : function(node) { return node.gold; },
 				format : normalFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"deaths":  { 
 				calc : function(node) { return node.deaths; },
 				format : normalFormat, 
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"lasthits":  { 
 				calc : function(node) { return node.lasthits; },
 				format : normalFormat, 
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"assists":  { 
 				calc : function(node) { return node.assists; }, 
 				format : normalFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"xp/min":  { 
 				calc : function(node) { return node.xp_min; }, 
 				format : normalFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"denies":  { 
 				calc : function(node) { return node.denies; }, 
 				format : normalFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"level":  { 
 				calc : function(node) { return node.level; }, 
 				format : normalFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"radiant-ratio":  { 
 				calc : function(node) { return node.radiant ? 100 : 0; }, 
 				format : percentFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : false
 			},
 			"win-ratio":  { 
 				calc : function(node) { return node.won ? 100 : 0; },
 				format : percentFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : false
 			}, 
 			"gold/min":  { 
 				calc : function(node) { return node.gold_min; },
 				format : normalFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : true
 			},
 			"duration": {
 				calc : function(node) { return node.duration; },
 				format : timeFormat,
-				sum : normalSum
+				sum : normalSum,
+				unique : false
 			}
 		};
 
@@ -100,6 +115,16 @@ define("data-container", ["jquery", "palette"], function() {
 			}
 			return result;
 
+		}
+
+		self.nonUniqueTypeKeys = function() {
+			var result = [];
+			for (var i in self.types) {
+				if (!self.types[i].unique) {
+					result.push(i);
+				}
+			}
+			return result;
 		}
 
 		self.typeKeys = function() {

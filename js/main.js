@@ -62,7 +62,6 @@ require(["timeline", "herostats", "teamstats", "data-container", "jquery"], func
 	
 	function fetch() {
 		var data = new DataContainer();
-		console.log(data);
 		var cancelLoading = setInterval(function() {
 			$("#loading").append(".");
 		}, 1000);

@@ -11,6 +11,8 @@ html, body {
 	float : left;
 	width : 20%;
 	margin-top : 30px;
+	max-height : calc(100% - 30px);
+	overflow : auto;
 }
 
 #chart,#table {
@@ -73,7 +75,7 @@ html, body {
 	border : #2C2C2C;
 	color : #FFFFFF;
 	width : 300px;
-	margin-left : -150px;
+	margin-left : -300px;
 }
 
 #menu {
