@@ -30,6 +30,24 @@ CREATE TABLE `users` (
   `active` enum('true','false') DEFAULT NULL,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`userid`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+CREATE TABLE `heroes` ( 
+  `heroid` int(11) NOT NULL,
+  `name` varchar(50) DEFAULT NULL,
+  `carry` enum('true','false') DEFAULT 'false',
+  `disabler` enum('true','false') DEFAULT 'false',
+  `durable` enum('true','false') DEFAULT 'false',
+  `escape` enum('true','false') DEFAULT 'false',
+  `initiator` enum('true','false') DEFAULT 'false',
+  `jungler` enum('true','false') DEFAULT 'false',
+  `lanesupport` enum('true','false') DEFAULT 'false',
+  `nuker` enum('true','false') DEFAULT 'false',
+  `pusher` enum('true','false') DEFAULT 'false',
+  `support` enum('true','false') DEFAULT 'false',
+  `melee` enum('true','false') DEFAULT 'false',
+  `ranged` enum('true','false') DEFAULT 'false',
+  PRIMARY KEY (`heroid`) 
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
 ```
 
 
