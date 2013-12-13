@@ -7,8 +7,8 @@ A statistics page in javascript, python and mysql for tracking progress of a few
 CREATE TABLE `matches` ( 
   `matchid` int(11) NOT NULL,
   `userid` int(11) NOT NULL,
-  `hero` varchar(100) NOT NULL,
-  `datetime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `heroid` int(11) NOT NULL,
+  `datetime` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `duration` int(11) NOT NULL,
   `kills` int(11) NOT NULL,
   `deaths` int(11) NOT NULL,
