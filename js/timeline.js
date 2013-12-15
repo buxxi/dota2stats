@@ -1,4 +1,4 @@
-define("timeline", ["jquery", "datgui", "flot", "flotselect"], function() {
+define("timeline", ["jquery", "datgui", "flot", "flotselect", "flottime"], function() {
 	return function Timeline(DataContainer) {
 		var self = this;
 	
@@ -43,7 +43,7 @@ define("timeline", ["jquery", "datgui", "flot", "flotselect"], function() {
 				},
 				xaxis : {
 					mode : "time",
-					timeformat : "%y-%0m-%0d"
+					timeformat : "%Y-%m-%d"
 				},
 				yaxis : {
 					tickFormatter : function(val, axis) {

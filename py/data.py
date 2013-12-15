@@ -2,6 +2,7 @@ import dotaconfig
 import json
 import MySQLdb
 import urllib2
+import sys
 from contextlib import closing
 from datetime import datetime
 from cgi import parse_qs, escape
@@ -12,15 +13,69 @@ MATCHES_URL = 		'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V0
 MATCHES_NEXT_URL = 	'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?key=%s&account_id=%s&start_at_match_id=%s'
 HEROES_URL = 		'https://api.steampowered.com/IEconDOTA2_570/GetHeroes/v0001/?key=%s&language=en_us'
 NAME_URL = 		'https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?steamids=%s&key=%s'
-HERO_INFO_URL = 	'http://stofi.omfilm.net/dota2/heroes.json'
+
+class HeroInfo:
+	def __init__(self, cursor):
+		self.cursor = cursor;
+	 	self.loaded_data = False
+		self.names = {}
+		self.roles = {}
+		self.all_roles = ["carry", "disabler", "durable", "escape", "initiator", "jungler", "lanesupport", "nuker", "pusher", "support", "melee", "ranged"]
+
+	def get_roles(self, heroid):
+		if not self.loaded_data:
+			self.loaded_data = True
+			self.load_heroes()
+		if heroid in self.roles:
+			return self.roles[heroid]
+		return []
+				
+	def get_name(self, heroid):
+		if not self.loaded_data:
+			self.loaded_data = True
+			self.load_heroes()
+		if heroid in self.names:
+			return self.names[heroid]
+		return ""
+	
+	def load_heroes(self):
+		self.cursor.execute("SELECT * FROM heroes")
+		heroes = self.cursor.fetchall()
+		for hero in heroes:
+			self.names[hero[0]] = hero[1]
+			self.roles[hero[0]] = []
+			for i in range(len(self.all_roles)):
+				if hero[i + 2] == 'true':
+					self.roles[hero[0]] += [self.all_roles[i].title()]
+
+
+	def update(self, jsonpath):
+		heroes = {}
+		data = json.loads(urllib2.urlopen(HEROES_URL % dotaconfig.API_KEY).read())
+		for x in data["result"]["heroes"]:
+			heroes[x["localized_name"]] = x["id"]
+
+		with closing(open(jsonpath, 'r')) as f:
+			hero_info = json.loads(f.read())
+			for key in hero_info:
+				name = hero_info[key]['name']
+				roles = hero_info[key]['roles'] + [hero_info[key]['atk']]
+				self.update_hero(heroes[name], name, [item.lower() for item in roles])
+	def update_hero(self, id, name, roles):
+		parameters = ["carry" in roles, "disabler" in roles, "durable" in roles, "escape" in roles, "initiator" in roles, "jungler" in roles, "lanesupport" in roles, "nuker" in roles, "pusher" in roles, "support" in roles, "melee" in roles, "ranged" in roles, id]
+		parameters = [name] + [str(p).lower() for p in parameters]		
+
+		affected_rows = self.cursor.execute("UPDATE heroes SET name = %s, carry = %s, disabler = %s, durable = %s, escape = %s, initiator = %s, jungler = %s, lanesupport = %s, nuker = %s, pusher = %s, support = %s, melee = %s, ranged = %s WHERE heroid = %s", parameters)
+		if affected_rows == 0:
+			self.cursor.execute("INSERT INTO heroes(name,carry,disabler,durable,escape,initiator,jungler,lanesupport,nuker,pusher,support,melee,ranged,heroid) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", parameters)	
 
 class MatchFetcher:
-	def __init__(self, cursor, hero_names):
+	def __init__(self, cursor):
 		self.cursor = cursor
-		self.hero_names = hero_names
 	
 	def load_new_matches(self, userid):
 		matchids = self.load_new_matchids(userid)
+		
 		for matchid in matchids:
 			try:
 				self.load_match(userid, matchid)	
@@ -62,8 +117,8 @@ class MatchFetcher:
 		radiant = pdata["player_slot"] <= 4
 		won = radiant == data["radiant_win"]
 
-		parameters = [matchid, userid, self.hero_names[pdata["hero_id"]], timestamp, data["duration"], pdata["kills"], pdata["deaths"], pdata["assists"], pdata["level"], pdata["gold"] + pdata["gold_spent"], pdata["last_hits"], pdata["denies"], pdata["xp_per_min"], pdata["gold_per_min"], str(won), str(radiant) ]
-		self.cursor.execute("INSERT INTO matches values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", parameters)	
+		parameters = [matchid, userid, pdata["hero_id"], timestamp, data["duration"], pdata["kills"], pdata["deaths"], pdata["assists"], pdata["level"], pdata["gold"] + pdata["gold_spent"], pdata["last_hits"], pdata["denies"], pdata["xp_per_min"], pdata["gold_per_min"], str(won), str(radiant) ]
+		self.cursor.execute("INSERT INTO matches(matchid,userid,heroid,datetime,duration,kills,deaths,assists,level,gold,lasthits,denies,xp_min,gold_min,won,radiant) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", parameters)	
 
 	def has_match(self, userid, matchid):
 		self.cursor.execute("SELECT COUNT(1) FROM matches WHERE userid = %s and matchid = %s", [userid, matchid])
@@ -82,8 +137,8 @@ class MatchOutputter:
 	def format_match(self, row):
 		return {
 			'matchid': row["matchid"],
-			'hero': row["hero"],
-			'roles': self.find_hero_roles(row["hero"]),
+			'hero': self.hero_info.get_name(row["heroid"]),
+			'roles': self.hero_info.get_roles(row["heroid"]),
 			'radiant': row["radiant"] == "true",
 			'won': row["won"] == "true",
 			'level': row["level"],
@@ -99,18 +154,12 @@ class MatchOutputter:
 			'duration': row["duration"]
 		}
 
-	def find_hero_roles(self, name):
-		for key in self.hero_info:
-			if self.hero_info[key]['name'] == name:
-				return self.hero_info[key]['roles'] + [self.hero_info[key]['atk']]
-		return []
-
 class DotaUser:
-	def __init__(self, userid, cursor, hero_names, hero_info):
+	def __init__(self, userid, cursor):
 		self.userid = userid
 		self.cursor = cursor
-		self.fetcher = MatchFetcher(cursor, hero_names)
-		self.outputter = MatchOutputter(cursor, hero_info)
+		self.fetcher = MatchFetcher(cursor)
+		self.outputter = MatchOutputter(cursor, HeroInfo(cursor))
 
 	def fetch(self):
 		if self.should_update():
@@ -158,24 +207,11 @@ def conn_db():
 	return conn
 
 def load_users(cursor):
-	hero_info = load_hero_info()	
-	hero_names = load_hero_names()
-
 	users = []
 	cursor.execute("SELECT userid FROM users WHERE active = 'true'")
 	for row in cursor.fetchall():
-		users.append(DotaUser(row[0], cursor, hero_names, hero_info))
+		users.append(DotaUser(row[0], cursor))
 	return users
-
-def load_hero_info():
-	return json.loads(urllib2.urlopen(HERO_INFO_URL).read())
-
-def load_hero_names():
-	result = {}
-	data = json.loads(urllib2.urlopen(HEROES_URL % dotaconfig.API_KEY).read())
-	for x in data["result"]["heroes"]:
-		result[x["id"]] = x["localized_name"]
-	return result
 
 def make_dict_list(result, cursor):
 	out = []
@@ -192,7 +228,10 @@ def make_dict(row, cursor):
 if  __name__ =='__main__':
 	with closing(conn_db()) as conn:
 		with closing(conn.cursor()) as cursor:
-			[user.fetch() for user in load_users(cursor)]
+			if sys.argv[1] == "--update-heroes":
+				HeroInfo(cursor).update(sys.argv[2])
+			elif sys.argv[1] == "--load-matches":
+				[user.fetch() for user in load_users(cursor)]
 	
 	
 		

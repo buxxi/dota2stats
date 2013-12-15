@@ -6,13 +6,15 @@ define(["jquery", "datgui", "tablesorter"], function() {
 		self.minimumGames = 1;
 		self.minimumPlayers = 1;
 		self.maximumPlayers = 5;
+		self.exclusive = true;
 
 		this.gui = function() {
 			var gui = new dat.GUI({ autoPlace: false });
-			gui.add(self, 'type', self.container.nonUniqueTypeKeys()).onFinishChange(self.draw);
+			gui.add(self, 'type', self.container.teamTypeKeys()).onFinishChange(self.draw);
 			gui.add(self, 'minimumGames', 1, 100).step(1).onFinishChange(self.draw);
 			gui.add(self, 'minimumPlayers', 1, 5).step(1).onFinishChange(self.draw);
 			gui.add(self, 'maximumPlayers', 1, 5).step(1).onFinishChange(self.draw);
+			gui.add(self, 'exclusive').onFinishChange(self.draw);
 			for (var i in self.container.players) {
 				var f = gui.addFolder(self.container.players[i].name);
 				f.add(self.container.players[i],'show').onFinishChange(self.draw);
@@ -38,25 +40,59 @@ define(["jquery", "datgui", "tablesorter"], function() {
 
 				for (var j in user.matches) {
 					var match = user.matches[j];
+					var value = self.container.types[self.type].calc(match);
 
 					if (!matches[match.matchid]) {
-						matches[match.matchid] = { value : self.container.types[self.type].calc(match), users : [user.id] };
+						matches[match.matchid] = { value : value, users : [user.id] };
 					} else {
 						matches[match.matchid].users.push(user.id);
+						if (self.type != "win-ratio" && self.type != "radiant-ratio" && self.type != "duration") {
+							matches[match.matchid].value += value;
+						}
 					}
 				}
 			}
 
 			var grouping = {};
+
+			var addMatch = function(users, value) {
+				if (!grouping[users]) {
+					grouping[users] = [];
+				}
+				grouping[users.join(",")].push(value);
+			};
+
+			var combinations = function(users) {
+				var result = [];
+				var f = function(prefix, users) {
+					for (var i = 0; i < users.length; i++) {
+						var tmp = [];
+						for (var j in prefix) {
+							tmp.push(prefix[j]);
+						}
+						tmp.push(users[i]);
+						result.push(tmp);
+						f(tmp, users.slice(i + 1));
+					}
+				};
+				f([], users);
+				return result;
+			};
+
+
 			for (var j in matches) {
 				var playerCount = matches[j].users.length;
 				if (playerCount < self.minimumPlayers || playerCount > self.maximumPlayers) {
 					continue;
 				}
-				if (!grouping[matches[j].users]) {
-					grouping[matches[j].users] = [];
+				if (self.exclusive) {
+					addMatch(matches[j].users, matches[j].value);
+				} else {
+					var result = combinations(matches[j].users);
+					for (var k in result) {
+						addMatch(result[k], matches[j].value);
+					}
 				}
-				grouping[matches[j].users.join(",")].push(matches[j].value);
 			}
 			
 			var result = [];
@@ -88,7 +124,7 @@ define(["jquery", "datgui", "tablesorter"], function() {
 			self.data = data;
 			$("#table thead tr").remove();
 			$("#table tbody tr").remove();
-			$("#table table thead").append("<tr><th>Player #1</th><th>Player #2</th><th>Player #3</th><th>Player #4</th><th>Player #5</th><th>Games</th><th>Won</th></tr>");
+			$("#table table thead").append("<tr><th>Player #1</th><th>Player #2</th><th>Player #3</th><th>Player #4</th><th>Player #5</th><th>Games</th><th>" + self.type + "</th></tr>");
 			for (var i in data) {
 				var team = data[i];
 				$("#table table tbody").append("<tr>" + 

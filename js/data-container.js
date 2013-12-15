@@ -11,92 +11,123 @@ define("data-container", ["jquery", "palette"], function() {
 				calc : function(node) { return node.kills; },
 				format : normalFormat,
 				sum : normalSum,
-				unique : true
+				teamRelevant : true
 			},
-			"kills+assist" : {
+			"kills+assists" : {
 				calc : function(node) { return node.kills + node.assists; },
 				format : normalFormat,
 				sum : normalSum,
-				unique : true
+				teamRelevant : false
 			},
 			"kills/death" : {
 				calc : function(node) { return [node.kills, node.deaths] },
 				format : normalFormat,
 				sum : averageSum,
-				unique : true				
+				teamRelevant : false				
 			},
-			"kills+assist/death" : {
+			"kills+assists/death" : {
 				calc : function(node) { return [node.kills + node.assists, node.deaths]; },
 				format : normalFormat,
 				sum : averageSum,
-				unique : true
-			},
-			"gold" :  { 
-				calc : function(node) { return node.gold; },
-				format : normalFormat,
-				sum : normalSum,
-				unique : true
-			},
-			"deaths":  { 
-				calc : function(node) { return node.deaths; },
-				format : normalFormat, 
-				sum : normalSum,
-				unique : true
-			},
-			"lasthits":  { 
-				calc : function(node) { return node.lasthits; },
-				format : normalFormat, 
-				sum : normalSum,
-				unique : true
+				teamRelevant : false
 			},
 			"assists":  { 
 				calc : function(node) { return node.assists; }, 
 				format : normalFormat,
 				sum : normalSum,
-				unique : true
+				teamRelevant : true
 			},
-			"xp/min":  { 
-				calc : function(node) { return node.xp_min; }, 
+			"deaths":  { 
+				calc : function(node) { return node.deaths; },
+				format : normalFormat, 
+				sum : normalSum,
+				teamRelevant : true
+			},
+			"gold" :  { 
+				calc : function(node) { return node.gold; },
 				format : normalFormat,
 				sum : normalSum,
-				unique : true
+				teamRelevant : true
+			},
+			"lasthits":  { 
+				calc : function(node) { return node.lasthits; },
+				format : normalFormat, 
+				sum : normalSum,
+				teamRelevant : true
 			},
 			"denies":  { 
 				calc : function(node) { return node.denies; }, 
 				format : normalFormat,
 				sum : normalSum,
-				unique : true
+				teamRelevant : true
 			},
 			"level":  { 
 				calc : function(node) { return node.level; }, 
 				format : normalFormat,
 				sum : normalSum,
-				unique : true
+				teamRelevant : true
 			},
 			"radiant-ratio":  { 
 				calc : function(node) { return node.radiant ? 100 : 0; }, 
 				format : percentFormat,
 				sum : normalSum,
-				unique : false
+				teamRelevant : true
 			},
 			"win-ratio":  { 
 				calc : function(node) { return node.won ? 100 : 0; },
 				format : percentFormat,
 				sum : normalSum,
-				unique : false
+				teamRelevant : true
 			}, 
-			"gold/min":  { 
-				calc : function(node) { return node.gold_min; },
-				format : normalFormat,
-				sum : normalSum,
-				unique : true
-			},
 			"duration": {
 				calc : function(node) { return node.duration; },
 				format : timeFormat,
 				sum : normalSum,
-				unique : false
+				teamRelevant : true
+			},
+			"kills/min": {
+				calc  : function(node) { return [ node.kills, node.duration / 60 ]; },
+				format : normalFormat,
+				sum : averageSum,
+				teamRelevant : false
+			},
+			"kills+assists/min" : {
+				calc : function(node) { return [ node.kills + node.assists, node.duration / 60 ]; },
+				format : normalFormat,
+				sum : averageSum,
+				teamRelevant : false
+			},
+			"assists/min" : {
+				calc : function(node) { return [ node.assists, node.duration / 60 ]; },
+				format : normalFormat,
+				sum : averageSum,
+				teamRelevant : false
+			},
+			"deaths/min" : {
+				calc : function(node) { return [ node.deaths, node.duration / 60 ]; },
+				format : normalFormat,
+				sum : averageSum,
+				teamRelevant : false
+			},
+			"lasthits/min" : {
+				calc : function(node) { return [ node.lasthits, node.duration / 60 ]; },
+				format : normalFormat,
+				sum : averageSum,
+				teamRelevant : false
+			},
+			"gold/min":  { 
+				calc : function(node) { return node.gold_min; },
+				format : normalFormat,
+				sum : normalSum,
+				teamRelevant : false
+			},
+			"xp/min":  { 
+				calc : function(node) { return node.xp_min; }, 
+				format : normalFormat,
+				sum : normalSum,
+				teamRelevant : false
 			}
+			
 		};
 
 		self.load = function(callback) {
@@ -117,10 +148,10 @@ define("data-container", ["jquery", "palette"], function() {
 
 		}
 
-		self.nonUniqueTypeKeys = function() {
+		self.teamTypeKeys = function() {
 			var result = [];
 			for (var i in self.types) {
-				if (!self.types[i].unique) {
+				if (self.types[i].teamRelevant) {
 					result.push(i);
 				}
 			}

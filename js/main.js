@@ -1,6 +1,10 @@
 require.config({
 	baseUrl: 'js',
 	paths: {
+		flotyum: 'ext/jquery.flot.JUMlib',
+		flotgantt: 'ext/jquery.flot.gantt',
+		flottime: 'ext/jquery.flot.time',
+		flotmouse: 'ext/jquery.flot.mouse',
 		flotselect: 'ext/jquery.flot.selection.min',
 		flot: 'ext/jquery.flot.min',
 		tablesorter: 'ext/jquery.tablesorter.min',
@@ -10,13 +14,17 @@ require.config({
 		datgui: 'ext/dat.gui.min'
 	},
 	shim: {
+		'flotgantt': ['flottime', 'flot', 'flotyum', 'flotmouse'],
+		'flottime' : ['flot', 'flotyum'],
+		'flotmouse' : ['flot', 'flotyum'],
+		'flotyum' : ['flot'],
 		'flotselect': ['flot'],
 		'flot': ['jquery'],
         	'palette': ['chroma']
 	}
 });
 
-require(["timeline", "herostats", "teamstats", "data-container", "jquery"], function(Timeline, HeroStats, TeamStats, DataContainer) {	
+require(["timeline", "herostats", "teamstats", "streaks", "data-container", "jquery"], function(Timeline, HeroStats, TeamStats, Streaks, DataContainer) {	
 	function showFirstPage() {
 		var matched = false;
 
@@ -57,7 +65,8 @@ require(["timeline", "herostats", "teamstats", "data-container", "jquery"], func
 		var li = menuItem("Timeline", "timeline", new Timeline(data));
 		var li2 = menuItem("Team stats", "teamstats", new TeamStats(data));
 		var li3 = menuItem("Hero stats", "herostats", new HeroStats(data));
-		$("#menu").append($("<ul>").append(li).append(li2).append(li3));
+		var li4 = menuItem("Streaks", "streaks", new Streaks(data));
+		$("#menu").append($("<ul>").append(li).append(li2).append(li3).append(li4));
 	}
 	
 	function fetch() {
