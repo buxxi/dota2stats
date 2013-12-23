@@ -1,4 +1,4 @@
-define(["jquery", "datgui", "flot", "flotgantt"], function() {
+define(["tooltip", "jquery", "datgui", "flot", "flotgantt"], function(Tooltip) {
 	return function Streaks(DataContainer) {
 		var self = this;
 		self.container = DataContainer;
@@ -6,6 +6,7 @@ define(["jquery", "datgui", "flot", "flotgantt"], function() {
 		self.min = 1;
 		self.max = 100;
 		self.minStreak = 3;
+		self.tooltip = new Tooltip(DataContainer);
 
 		this.gui = function() {
 			var gui = new dat.GUI({ autoPlace: false });
@@ -49,16 +50,17 @@ define(["jquery", "datgui", "flot", "flotgantt"], function() {
 				}	
 			};
 			var chart = $("#chart");
-			chart.show();
+			chart.unbind().show();
 			var plot = $.plot(chart, self.getFilteredData(), options);
-			chart.bind("plothover", function(event, pos, item) {
-				$("#tooltip").remove();
-
-				if (item) {
+			chart.bind("plotclick", function(event, pos, item) {
+				if (item == null) {
+					self.tooltip.hide();
+					return;
+				} else {
 					var itemdata = item.series.data[item.dataIndex];
-					var content = itemdata[3] + " games in a row, ended on " + $.plot.formatDate(new Date(itemdata[4]), "%Y-%m-%d");
-					$('<div id="tooltip">' + content + '</div>').css({ left: pos.pageX + 5, top: pos.pageY + 5}).appendTo("body").fadeIn(200);	
-				}
+					var content = "<b>" + itemdata[3] + "</b> games in a row, ended on " + $.plot.formatDate(new Date(itemdata[4]), "%Y-%m-%d");
+					self.tooltip.show(pos, content, "");
+				}				
 			});
 			
 		}

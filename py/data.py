@@ -90,12 +90,14 @@ class MatchFetcher:
 		print ("Fetching %s" % (nexturl))
 		data = json.loads(urllib2.urlopen(nexturl).read())["result"]	
 		while data["matches"]:
+			last_match_id = 0
 			for x in data["matches"]:
+				last_match_id = x["match_id"]
 				if self.has_match(userid, x["match_id"]):
-					return newmatches	
+					return newmatches
 				else:
 					newmatches.insert(0, x["match_id"])
-			nexturl = MATCHES_NEXT_URL % (dotaconfig.API_KEY, userid, newmatches[0] - 1)
+			nexturl = MATCHES_NEXT_URL % (dotaconfig.API_KEY, userid, last_match_id - 1)
 			print ("Fetching %s" % (nexturl))
 			data = json.loads(urllib2.urlopen(nexturl).read())["result"]	
 		return newmatches
@@ -105,8 +107,8 @@ class MatchFetcher:
 		print ("Fetching %s" % (nexturl))
 		data = json.loads(urllib2.urlopen(nexturl).read())["result"]
 
-		if data["lobby_type"] != 0:
-			raise Exception("Game was not a public matchmaking game")
+		if data["lobby_type"] != 0 and data["lobby_type"] != 7:
+			raise Exception("Game was not a public or ranked matchmaking game")
 
 		pdata = {}
 		for x in data["players"]:

@@ -46,7 +46,7 @@ require(["timeline", "herostats", "teamstats", "streaks", "data-container", "jqu
 	function menuItem(text, href, page) {
 		var li = $("<li>");	
 		var setActive = function() {
-			$("#table,#chart").hide();
+			$("#table,#chart,#tooltip").hide();
 			$("#menu li").removeClass("active");
 			li.addClass("active");	
 			$("#gui").empty().append(page.gui().domElement);

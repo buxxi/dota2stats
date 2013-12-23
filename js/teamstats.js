@@ -56,6 +56,11 @@ define(["jquery", "datgui", "tablesorter"], function() {
 			var grouping = {};
 
 			var addMatch = function(users, value) {
+				var playerCount = users.length;
+				if (playerCount < self.minimumPlayers || playerCount > self.maximumPlayers) {
+					return;
+				}
+
 				if (!grouping[users]) {
 					grouping[users] = [];
 				}
@@ -81,10 +86,6 @@ define(["jquery", "datgui", "tablesorter"], function() {
 
 
 			for (var j in matches) {
-				var playerCount = matches[j].users.length;
-				if (playerCount < self.minimumPlayers || playerCount > self.maximumPlayers) {
-					continue;
-				}
 				if (self.exclusive) {
 					addMatch(matches[j].users, matches[j].value);
 				} else {

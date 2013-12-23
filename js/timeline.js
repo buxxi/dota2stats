@@ -1,4 +1,6 @@
-define("timeline", ["jquery", "datgui", "flot", "flotselect", "flottime"], function() {
+define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottime"], function(Tooltip) {
+
+
 	return function Timeline(DataContainer) {
 		var self = this;
 	
@@ -8,9 +10,8 @@ define("timeline", ["jquery", "datgui", "flot", "flotselect", "flottime"], funct
 
 		self.backtrack = Math.min(100,self.container.maxCount());
 		self.matchid = 0;
-		self.showSelectedMatch = function() {
-			window.open("http://dotabuff.com/matches/" + self.matchid);
-		}
+		self.tooltip = new Tooltip(DataContainer);
+		self.unselect = false;
 
 		this.gui = function() {
 			var gui = new dat.GUI({ autoPlace: false });
@@ -24,7 +25,6 @@ define("timeline", ["jquery", "datgui", "flot", "flotselect", "flottime"], funct
 				f.addColor(players[i],'color').onChange(self.draw);
 				f.open();
 			}
-			gui.add(self, 'showSelectedMatch');
 			return gui;
 		};
 
@@ -53,18 +53,34 @@ define("timeline", ["jquery", "datgui", "flot", "flotselect", "flottime"], funct
 				selection: { mode: "x" }	
 			};
 			var chart = $("#chart");
-			chart.show();
+			chart.unbind().show();
 			var plot = $.plot(chart, self.getFilteredData(), options);
 			chart.bind("plotclick", function(event, pos, item) {
-				if (item == null) { return; }
-				self.matchid = item.series.data[item.dataIndex][2].matchid;
-			});
-			chart.bind("plothover", function(event, pos, item) {
-				$("#tooltip").remove();
+				if (item == null) { 
+					var isShowing = self.tooltip.isShowing();
+					self.tooltip.hide();
+					
+					if (!self.unselect || isShowing) {
+						return;
+					}
 
-				if (item) {
-					var content = $.plot.formatDate(new Date(item.datapoint[0]), options.xaxis.timeformat) + ' = ' + self.container.types[self.type].format(item.datapoint[1]);
-					$('<div id="tooltip">' + content + '</div>').css({ left: pos.pageX + 5, top: pos.pageY + 5}).appendTo("body").fadeIn(200);	
+					if (!options.xaxis.min && !options.xaxis.max) {
+						return;
+					}			
+
+					self.unselect = false;
+					delete options.xaxis.min;
+					delete options.xaxis.max;
+					delete options.yaxis.min;
+					delete options.yaxis.max;
+
+					plot = $.plot(chart, self.getFilteredData(), options);
+					return;
+				} else {
+					var value = self.container.types[self.type].format(item.datapoint[1]);
+					var header = $.plot.formatDate(new Date(item.datapoint[0]), options.xaxis.timeformat);
+					var content = self.type + ": <b>" + value + "</b> over the last " + self.backtrack + " matches";
+					self.tooltip.show(pos, content, header, item.series.data[item.dataIndex][2].matchid);
 				}
 			});
 
@@ -94,17 +110,8 @@ define("timeline", ["jquery", "datgui", "flot", "flotselect", "flottime"], funct
 
 				plot = $.plot(chart, data, options);
 			});
-			chart.bind("plotunselected", function (event) {
-				if (!options.xaxis.min && !options.xaxis.max) {
-					return;
-				}			
-
-				delete options.xaxis.min;
-				delete options.xaxis.max;
-				delete options.yaxis.min;
-				delete options.yaxis.max;
-
-				plot = $.plot(chart, self.getFilteredData(), options);
+			chart.bind("plotunselected", function() {
+				self.unselect = true;
 			});
 		};
 

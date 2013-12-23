@@ -60,10 +60,40 @@ html, body {
 #tooltip {
 	position : absolute;
 	z-index : 2;
-        border : 1px solid #666;
         font-size : 0.8em;
-        background-color : #fff;
+	background : #111111;
+	border : #2C2C2C;
+	color : #FFFFFF;
         padding : 3px;
+	display : none;
+	width : 300px;
+}
+
+#tooltip h2 {
+	margin : 0;
+	font-size : 1.2em;
+}
+
+#tooltip p {
+	margin : 0 0.5em;
+}
+
+#tooltip a {
+	float : right;
+	color : #FFFFFF;
+	text-decoration : none;
+}
+
+#tooltip td {
+	font-size : 0.8em;
+	color : white;
+	border : 1px solid #2C2C2C;
+	padding : 2px;
+
+	outline: medium none;
+	text-align: center; 
+	font-weight: bold; 
+	text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.7);
 }
 
 #loading {
