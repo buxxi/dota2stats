@@ -79,6 +79,18 @@ define("data-container", ["jquery", "palette"], function() {
 				sum : normalSum,
 				teamRelevant : true
 			}, 
+			"kill+assist-ratio": {
+				calc : function(node) { return [100 * (node.kills + node.assists), node.total_kills]; },
+				format : percentFormat,
+				sum : averageSum,
+				teamRelevant : false
+			},
+			"death-ratio": {
+				calc : function(node) { return [100 * node.deaths, node.total_deaths]; },
+				format : percentFormat,
+				sum : averageSum,
+				teamRelevant : false
+			},
 			"duration": {
 				calc : function(node) { return node.duration; },
 				format : timeFormat,

@@ -21,6 +21,8 @@ CREATE TABLE `matches` (
   `gold_min` int(11) NOT NULL,
   `won` enum('true','false') NOT NULL,
   `radiant` enum('true','false') NOT NULL,
+  `total_kills` int(11) NOT NULL,
+  `total_deaths` int(11) NOT NULL,
   PRIMARY KEY (`matchid`,`userid`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
 

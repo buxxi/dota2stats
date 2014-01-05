@@ -1,6 +1,4 @@
 define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottime"], function(Tooltip) {
-
-
 	return function Timeline(DataContainer) {
 		var self = this;
 	
@@ -9,6 +7,7 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 		self.type = "kills/death";
 
 		self.backtrack = Math.min(100,self.container.maxCount());
+		self.skip_initial = false;
 		self.matchid = 0;
 		self.tooltip = new Tooltip(DataContainer);
 		self.unselect = false;
@@ -18,6 +17,7 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 			gui.add(self, 'role', self.container.roleKeys()).onFinishChange(self.draw);
 			gui.add(self, 'type', self.container.typeKeys()).onFinishChange(self.draw);
 			gui.add(self, 'backtrack', 1, self.container.maxCount()).step(1).onFinishChange(self.draw);
+			gui.add(self, 'skip_initial').onFinishChange(self.draw);
 			var players = self.container.players;
 			for (var i in players) {
 				var f = gui.addFolder(self.container.players[i].name);
@@ -126,7 +126,8 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 				var filter = self.container.roles[self.role];
 				var type = self.container.types[self.type];
 				var result = [];
-		
+				var matches = [];		
+
 				user.matches.sort(function(a, b) {
 					return Date.parse(a.datetime) - Date.parse(b.datetime);
 				});
@@ -134,7 +135,10 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 				for (var j in user.matches) {
 					var match = user.matches[j];
 					if (filter(match)) {
-						result.push([Date.parse(match.datetime),self.getAverage(user.matches, j, type), {matchid: match.matchid}]);
+						matches.push(match);
+						if (!self.skip_initial || matches.length >= self.backtrack) {
+							result.push([Date.parse(match.datetime), self.getAverage(matches, type), {matchid: match.matchid}]);
+						}
 					}
 				}
 				data.push({data: result, label: user.name, color: self.container.players[user.id].color});
@@ -142,11 +146,11 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 			return data;
 		};
 	
-		self.getAverage = function(matches, i, type) {
+		self.getAverage = function(matches, type) {
 			var tmp = [];
-			for (var j = 0; j < self.backtrack; j++) {
-				if (i - j >= 0) {
-					tmp.push(type.calc(matches[i - j]));
+			for (var j = 1; j <= self.backtrack; j++) {
+				if (matches.length - j >= 0) {
+					tmp.push(type.calc(matches[matches.length - j]));
 				}
 			}
 			return type.sum(tmp);

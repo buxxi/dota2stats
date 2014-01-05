@@ -9,8 +9,8 @@ define("herostats", ["jquery", "datgui", "tablesorter"], function() {
 
 		this.gui = function() {
 			var gui = new dat.GUI({ autoPlace: false });
-			gui.add(self, 'type', self.container.typeKeys()).onFinishChange(self.draw);
 			gui.add(self, 'role', self.container.roleKeys()).onFinishChange(self.draw);
+			gui.add(self, 'type', self.container.typeKeys()).onFinishChange(self.draw);
 			gui.add(self, 'minimum', 1, 100).step(1).onFinishChange(self.draw);
 
 			for (var i in self.container.players) {

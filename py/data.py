@@ -111,16 +111,25 @@ class MatchFetcher:
 			raise Exception("Game was not a public or ranked matchmaking game")
 
 		pdata = {}
+		total_radiant_kills = 0
+		total_dire_kills = 0
 		for x in data["players"]:
 			if x["account_id"] == userid:
 				pdata = x
+			if x["player_slot"] <= 4:
+				total_radiant_kills += x["kills"]
+			else:
+				total_dire_kills += x["kills"]
 
 		timestamp = datetime.fromtimestamp(data["start_time"]).isoformat()
 		radiant = pdata["player_slot"] <= 4
 		won = radiant == data["radiant_win"]
 
-		parameters = [matchid, userid, pdata["hero_id"], timestamp, data["duration"], pdata["kills"], pdata["deaths"], pdata["assists"], pdata["level"], pdata["gold"] + pdata["gold_spent"], pdata["last_hits"], pdata["denies"], pdata["xp_per_min"], pdata["gold_per_min"], str(won), str(radiant) ]
-		self.cursor.execute("INSERT INTO matches(matchid,userid,heroid,datetime,duration,kills,deaths,assists,level,gold,lasthits,denies,xp_min,gold_min,won,radiant) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", parameters)	
+		total_kills = total_radiant_kills if radiant else total_dire_kills
+		total_deaths = total_dire_kills if radiant else total_radiant_kills
+
+		parameters = [matchid, userid, pdata["hero_id"], timestamp, data["duration"], pdata["kills"], pdata["deaths"], pdata["assists"], pdata["level"], pdata["gold"] + pdata["gold_spent"], pdata["last_hits"], pdata["denies"], pdata["xp_per_min"], pdata["gold_per_min"], str(won), str(radiant), total_kills, total_deaths ]
+		self.cursor.execute("INSERT INTO matches(matchid,userid,heroid,datetime,duration,kills,deaths,assists,level,gold,lasthits,denies,xp_min,gold_min,won,radiant,total_kills,total_deaths) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", parameters)	
 
 	def has_match(self, userid, matchid):
 		self.cursor.execute("SELECT COUNT(1) FROM matches WHERE userid = %s and matchid = %s", [userid, matchid])
@@ -153,7 +162,9 @@ class MatchOutputter:
 			'xp_min': row["xp_min"], 
 			'gold_min': row["gold_min"],
 			'datetime': row["datetime"].isoformat(),
-			'duration': row["duration"]
+			'duration': row["duration"],
+			'total_kills' : row["total_kills"],
+			'total_deaths' : row["total_deaths"]
 		}
 
 class DotaUser:

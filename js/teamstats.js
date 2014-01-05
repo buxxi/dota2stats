@@ -123,12 +123,14 @@ define(["jquery", "datgui", "tablesorter"], function() {
 
 		this.render = function(data) {
 			self.data = data;
+			var pos = 1;
 			$("#table thead tr").remove();
 			$("#table tbody tr").remove();
-			$("#table table thead").append("<tr><th>Player #1</th><th>Player #2</th><th>Player #3</th><th>Player #4</th><th>Player #5</th><th>Games</th><th>" + self.type + "</th></tr>");
+			$("#table table thead").append("<tr><th>#</th><th>Player #1</th><th>Player #2</th><th>Player #3</th><th>Player #4</th><th>Player #5</th><th>Games</th><th>" + self.type + "</th></tr>");
 			for (var i in data) {
 				var team = data[i];
-				$("#table table tbody").append("<tr>" + 
+				$("#table table tbody").append("<tr>" +
+					"<td>" + pos++ + "</td>" +  
 					playerTD(team.users[0]) + 
 					playerTD(team.users[1]) +
 					playerTD(team.users[2]) +
