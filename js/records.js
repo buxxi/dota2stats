@@ -2,10 +2,11 @@ define("records", ["jquery", "datgui"], function() {
 	return function Records(DataContainer) {
 		var self = this;
 		self.container = DataContainer;
-
+		self.role = "all";
 
 		this.gui = function() {
 			var gui = new dat.GUI({ autoPlace: false });
+			gui.add(self, 'role', self.container.roleKeys()).onFinishChange(self.draw);
 
 			for (var i in self.container.players) {
 				var f = gui.addFolder(self.container.players[i].name);
@@ -33,7 +34,11 @@ define("records", ["jquery", "datgui"], function() {
 				var records = {};
 				for (var j in user.matches) {
 					var match = user.matches[j];
-						
+					
+					if (!self.container.roles[self.role](match)) {
+						continue;
+					}
+	
 					for (var k in self.container.types) {
 						var type = self.container.types[k];
 						var value = type.sum([type.calc(match)]);
@@ -60,7 +65,7 @@ define("records", ["jquery", "datgui"], function() {
 			}			
 			
 			for (var j in self.container.types) {
-				$("#table table tbody").append("<tr><td>" + j + "</tr>");
+				$("#table table tbody").append("<tr><th>" + j + "</th>");
 
 				for (var i in data) {
 					var value = self.container.types[j].format(data[i].data[j].value);
