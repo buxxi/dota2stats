@@ -24,7 +24,7 @@ require.config({
 	}
 });
 
-require(["timeline", "herostats", "teamstats", "streaks", "records", "data-container", "jquery"], function(Timeline, HeroStats, TeamStats, Streaks, Records, DataContainer) {	
+require(["timeline", "herostats", "teamstats", "streaks", "records", "totals", "data-container", "jquery"], function(Timeline, HeroStats, TeamStats, Streaks, Records, Totals, DataContainer) {	
 	function showFirstPage() {
 		var matched = false;
 
@@ -67,7 +67,8 @@ require(["timeline", "herostats", "teamstats", "streaks", "records", "data-conta
 		var li3 = menuItem("Hero stats", "herostats", new HeroStats(data));
 		var li4 = menuItem("Streaks", "streaks", new Streaks(data));
 		var li5 = menuItem("Records", "records", new Records(data));
-		$("#menu").append($("<ul>").append(li).append(li2).append(li3).append(li4).append(li5));
+		var li6 = menuItem("Totals", "totals", new Totals(data));
+		$("#menu").append($("<ul>").append(li).append(li2).append(li3).append(li4).append(li5).append(li6));
 	}
 	
 	function fetch() {

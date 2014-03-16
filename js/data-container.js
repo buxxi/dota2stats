@@ -209,9 +209,10 @@ define("data-container", ["jquery", "palette"], function() {
 
 		function timeFormat(input) {
 			input = input.toFixed(0);
-			var hours = Math.floor(input / 3600);
-			var minutes = Math.floor((input - (hours * 3600)) / 60);
-			return (hours > 0 ? hours + "h" : "") + minutes + "m";
+			var days = Math.floor(input / 86400);
+			var hours = Math.floor((input - (days * 86400)) / 3600);
+			var minutes = Math.floor((input - (days * 86400) - (hours * 3600)) / 60);
+			return (days > 0 ? days + "d" : "") + (hours > 0 ? hours + "h" : "") + minutes + "m";
 		}
 
 		function percentFormat(input) {
