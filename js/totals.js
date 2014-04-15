@@ -3,10 +3,12 @@ define("totals", ["jquery", "datgui"], function() {
 		var self = this;
 		self.container = DataContainer;
 		self.role = "all";
+		self.result = "all";
 
 		this.gui = function() {
 			var gui = new dat.GUI({ autoPlace: false });
 			gui.add(self, 'role', self.container.roleKeys()).onFinishChange(self.draw);
+			gui.add(self, 'result', self.container.winLossKeys()).onFinishChange(self.draw);
 
 			for (var i in self.container.players) {
 				var f = gui.addFolder(self.container.players[i].name);
@@ -40,7 +42,10 @@ define("totals", ["jquery", "datgui"], function() {
 					for (var j in user.matches) {
 						var match = user.matches[j];
 					
-						if (!self.container.roles[self.role](match)) {
+						var roleFilter = self.container.roles[self.role];
+						var winLossFilter = self.container.winLossFilter(self.result);
+
+						if (!roleFilter(match) || !winLossFilter(match)) {
 							continue;
 						}
 

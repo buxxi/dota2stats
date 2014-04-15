@@ -4,12 +4,14 @@ define("herostats", ["jquery", "datgui", "tablesorter"], function() {
 		self.container = DataContainer;
 
 		self.role = "all";
+		self.result = "all";
 		self.type = "win-ratio";
 		self.minimum = 5;
 
 		this.gui = function() {
 			var gui = new dat.GUI({ autoPlace: false });
 			gui.add(self, 'role', self.container.roleKeys()).onFinishChange(self.draw);
+			gui.add(self, 'result', self.container.winLossKeys()).onFinishChange(self.draw);
 			gui.add(self, 'type', self.container.typeKeys()).onFinishChange(self.draw);
 			gui.add(self, 'minimum', 1, 100).step(1).onFinishChange(self.draw);
 
@@ -40,7 +42,11 @@ define("herostats", ["jquery", "datgui", "tablesorter"], function() {
 				var heroes = [];
 				for (var j in user.matches) {
 					var match = user.matches[j];
-					if (!self.container.roles[self.role](match)) {
+
+					var roleFilter = self.container.roles[self.role];
+					var winLossFilter = self.container.winLossFilter(self.result);
+
+					if (!roleFilter(match) || !winLossFilter(match)) {
 						continue;
 					}
 

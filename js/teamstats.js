@@ -3,6 +3,7 @@ define(["jquery", "datgui", "tablesorter"], function() {
 		var self = this;
 		self.container = DataContainer;
 		self.type = "win-ratio";
+		self.result = "";
 		self.minimumGames = 1;
 		self.minimumPlayers = 1;
 		self.maximumPlayers = 5;
@@ -11,6 +12,7 @@ define(["jquery", "datgui", "tablesorter"], function() {
 		this.gui = function() {
 			var gui = new dat.GUI({ autoPlace: false });
 			gui.add(self, 'type', self.container.teamTypeKeys()).onFinishChange(self.draw);
+			gui.add(self, 'result', self.container.winLossKeys()).onFinishChange(self.draw);
 			gui.add(self, 'minimumGames', 1, 100).step(1).onFinishChange(self.draw);
 			gui.add(self, 'minimumPlayers', 1, 5).step(1).onFinishChange(self.draw);
 			gui.add(self, 'maximumPlayers', 1, 5).step(1).onFinishChange(self.draw);
@@ -42,12 +44,15 @@ define(["jquery", "datgui", "tablesorter"], function() {
 					var match = user.matches[j];
 					var value = self.container.types[self.type].calc(match);
 
-					if (!matches[match.matchid]) {
-						matches[match.matchid] = { value : value, users : [user.id] };
-					} else {
-						matches[match.matchid].users.push(user.id);
-						if (self.type != "win-ratio" && self.type != "radiant-ratio" && self.type != "duration") {
-							matches[match.matchid].value += value;
+					var winLossFilter = self.container.winLossFilter(self.result);
+					if (winLossFilter(match)) {
+						if (!matches[match.matchid]) {
+							matches[match.matchid] = { value : value, users : [user.id] };
+						} else {
+							matches[match.matchid].users.push(user.id);
+							if (self.type != "win-ratio" && self.type != "radiant-ratio" && self.type != "duration") {
+								matches[match.matchid].value += value;
+							}
 						}
 					}
 				}

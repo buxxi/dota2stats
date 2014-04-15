@@ -178,6 +178,21 @@ define("data-container", ["jquery", "palette"], function() {
 			return result;
 		}
 
+		self.winLossKeys = function() {
+			return ["all", "wins only", "losses only"];
+		}
+
+		self.winLossFilter = function(value) {
+			return function(match) {
+				if (value == "wins only") {
+					return match.won;
+				} else if (value == "losses only") {
+					return !match.won;
+				}
+				return true;
+			};
+		}
+
 		self.maxCount = function() {
 			var max = 0;
 			for (var i in self.unfilteredData) {

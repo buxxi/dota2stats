@@ -4,6 +4,7 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 	
 		self.container = DataContainer;
 		self.role = "all";
+		self.result = "all";
 		self.type = "kills/death";
 
 		self.backtrack = Math.min(100,self.container.maxCount());
@@ -15,6 +16,7 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 		this.gui = function() {
 			var gui = new dat.GUI({ autoPlace: false });
 			gui.add(self, 'role', self.container.roleKeys()).onFinishChange(self.draw);
+			gui.add(self, 'result', self.container.winLossKeys()).onFinishChange(self.draw);
 			gui.add(self, 'type', self.container.typeKeys()).onFinishChange(self.draw);
 			gui.add(self, 'backtrack', 1, self.container.maxCount()).step(1).onFinishChange(self.draw);
 			gui.add(self, 'skip_initial').onFinishChange(self.draw);
@@ -123,7 +125,8 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 					continue;
 				}
 
-				var filter = self.container.roles[self.role];
+				var roleFilter = self.container.roles[self.role];
+				var winLossFilter = self.container.winLossFilter(self.result);
 				var type = self.container.types[self.type];
 				var result = [];
 				var matches = [];		
@@ -134,7 +137,7 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 
 				for (var j in user.matches) {
 					var match = user.matches[j];
-					if (filter(match)) {
+					if (roleFilter(match) && winLossFilter(match)) {
 						matches.push(match);
 						if (!self.skip_initial || matches.length >= self.backtrack) {
 							result.push([Date.parse(match.datetime), self.getAverage(matches, type), {matchid: match.matchid}]);
