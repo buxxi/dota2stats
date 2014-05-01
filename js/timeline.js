@@ -119,33 +119,25 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 
 		this.getFilteredData = function() {
 			var data = [];
-			for (var i in self.container.unfilteredData) {
-				var user = self.container.unfilteredData[i];
-				if (!self.container.players[user.id].show) {
-					continue;
+	
+			var type = self.container.types[self.type];
+			var result = [];
+			var matches = [];
+	
+			self.container.filteredData(true, self.role, self.result, 
+				function(user, match) {				
+					matches.push(match);
+					if (!self.skip_initial || matches.length >= self.backtrack) {
+						result.push([Date.parse(match.datetime), self.getAverage(matches, type), {matchid: match.matchid}]);
+					}			
+				}, 
+				function (user) {
+					data.push({data: result, label: user.name, color: self.container.players[user.id].color});
+					matches = [];
+					result = [];
 				}
+			);
 
-				var roleFilter = self.container.roles[self.role];
-				var winLossFilter = self.container.winLossFilter(self.result);
-				var type = self.container.types[self.type];
-				var result = [];
-				var matches = [];		
-
-				user.matches.sort(function(a, b) {
-					return Date.parse(a.datetime) - Date.parse(b.datetime);
-				});
-
-				for (var j in user.matches) {
-					var match = user.matches[j];
-					if (roleFilter(match) && winLossFilter(match)) {
-						matches.push(match);
-						if (!self.skip_initial || matches.length >= self.backtrack) {
-							result.push([Date.parse(match.datetime), self.getAverage(matches, type), {matchid: match.matchid}]);
-						}
-					}
-				}
-				data.push({data: result, label: user.name, color: self.container.players[user.id].color});
-			}
 			return data;
 		};
 	

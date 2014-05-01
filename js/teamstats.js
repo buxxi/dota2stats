@@ -32,31 +32,24 @@ define(["jquery", "datgui", "tablesorter"], function() {
 		}
 
 		this.getFilteredData = function() {
-			var matches = [];
+			var matches = {};
 
-			for (var i in self.container.unfilteredData) {
-				var user = self.container.unfilteredData[i];
-				if (!self.container.players[user.id].show) {
-					continue;
-				}
-
-				for (var j in user.matches) {
-					var match = user.matches[j];
-					var value = self.container.types[self.type].calc(match);
-
-					var winLossFilter = self.container.winLossFilter(self.result);
-					if (winLossFilter(match)) {
-						if (!matches[match.matchid]) {
-							matches[match.matchid] = { value : value, users : [user.id] };
-						} else {
-							matches[match.matchid].users.push(user.id);
-							if (self.type != "win-ratio" && self.type != "radiant-ratio" && self.type != "duration") {
-								matches[match.matchid].value += value;
-							}
+			var type = self.container.types[self.type];
+			self.container.filteredData(true, "all", self.result, 
+				function(user, match) {	
+					var value = type.calc(match);
+			
+					if (!matches[match.matchid]) {
+						matches[match.matchid] = { value : value, users : [user.id] };
+					} else {
+						matches[match.matchid].users.push(user.id);
+						if (self.type != "win-ratio" && self.type != "radiant-ratio" && self.type != "duration") {
+							matches[match.matchid].value += value;
 						}
-					}
-				}
-			}
+					}			
+				}, 
+				function (user) {}
+			);
 
 			var grouping = {};
 

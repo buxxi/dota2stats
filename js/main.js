@@ -10,7 +10,7 @@ require.config({
 		tablesorter: 'ext/jquery.tablesorter.min',
 		palette: 'ext/chroma.palette-gen',
 		chroma: 'ext/chroma',
-		jquery: 'ext/jquery-1.4.2.min',
+		jquery: 'ext/jquery-2.1.0.min',
 		datgui: 'ext/dat.gui.min'
 	},
 	shim: {
@@ -24,7 +24,7 @@ require.config({
 	}
 });
 
-require(["timeline", "herostats", "teamstats", "streaks", "records", "totals", "data-container", "jquery"], function(Timeline, HeroStats, TeamStats, Streaks, Records, Totals, DataContainer) {	
+require(["timeline", "herostats", "teamstats", "records", "totals", "data-container", "jquery"], function(Timeline, HeroStats, TeamStats, Records, Totals, DataContainer) {	
 	function showFirstPage() {
 		var matched = false;
 
@@ -65,10 +65,9 @@ require(["timeline", "herostats", "teamstats", "streaks", "records", "totals", "
 		var li = menuItem("Timeline", "timeline", new Timeline(data));
 		var li2 = menuItem("Team stats", "teamstats", new TeamStats(data));
 		var li3 = menuItem("Hero stats", "herostats", new HeroStats(data));
-		var li4 = menuItem("Streaks", "streaks", new Streaks(data));
-		var li5 = menuItem("Records", "records", new Records(data));
-		var li6 = menuItem("Totals", "totals", new Totals(data));
-		$("#menu").append($("<ul>").append(li).append(li2).append(li3).append(li4).append(li5).append(li6));
+		var li4 = menuItem("Records", "records", new Records(data));
+		var li5 = menuItem("Totals", "totals", new Totals(data));
+		$("#menu").append($("<ul>").append(li).append(li2).append(li3).append(li4).append(li5));
 	}
 	
 	function fetch() {

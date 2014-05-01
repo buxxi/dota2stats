@@ -182,6 +182,30 @@ define("data-container", ["jquery", "palette"], function() {
 			return ["all", "wins only", "losses only"];
 		}
 
+		self.filteredData = function(filterPlayers, role, result, matchCallback, userCallback) {
+			var roleFilter = self.roles[role];
+			var winLossFilter = self.winLossFilter(result);
+
+			self.unfilteredData.forEach(function(user) {
+				if (filterPlayers && !self.players[user.id].show) {
+					return;
+				}
+				
+				user.matches.sort(function(a, b) {
+					return Date.parse(a.datetime) - Date.parse(b.datetime);
+				});
+
+				user.matches.forEach(function(match) {
+					if (!roleFilter(match) || !winLossFilter(match)) {
+						return;
+					}
+					
+					matchCallback(user, match);
+				});
+				userCallback(user);				
+			});
+		}
+
 		self.winLossFilter = function(value) {
 			return function(match) {
 				if (value == "wins only") {

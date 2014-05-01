@@ -27,39 +27,27 @@ define("totals", ["jquery", "datgui"], function() {
 		this.getFilteredData = function() {
 			var result = [];
 
-			for (var i in self.container.unfilteredData) {
-				var user = self.container.unfilteredData[i];
-				if (!self.container.players[user.id].show) {
-					continue;
-				}
-
-				var records = {};
-				for (var k in self.container.types) {
-					if (!showType(k)) {
-						continue;
-					}
-					
-					for (var j in user.matches) {
-						var match = user.matches[j];
-					
-						var roleFilter = self.container.roles[self.role];
-						var winLossFilter = self.container.winLossFilter(self.result);
-
-						if (!roleFilter(match) || !winLossFilter(match)) {
+			var totals = {};
+			self.container.filteredData(true, self.role, self.result, 
+				function(user, match) {				
+					for (var k in self.container.types) {
+						if (!showType(k)) {
 							continue;
 						}
 
 						var type = self.container.types[k];
 						var value = type.sum([type.calc(match)]);						
-						if (!(k in records)) {
-							records[k] = 0;
+						if (!(k in totals)) {
+							totals[k] = 0;
 						}
-						records[k] += value;
-					}
+						totals[k] += value;
+					}		
+				}, 
+				function (user) {
+					result.push({ userid: user.id, data: totals });
+					totals = {};
 				}
-				result.push({ userid: user.id, data: records });				
-			}
-
+			);
 
 			return result;
 		};

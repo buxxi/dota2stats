@@ -33,42 +33,33 @@ define("herostats", ["jquery", "datgui", "tablesorter"], function() {
 			var result = [];
 			var avg = 0;		
 
-			for (var i in self.container.unfilteredData) {
-				var user = self.container.unfilteredData[i];
-				if (!self.container.players[user.id].show) {
-					continue;
-				}
-
-				var heroes = [];
-				for (var j in user.matches) {
-					var match = user.matches[j];
-
-					var roleFilter = self.container.roles[self.role];
-					var winLossFilter = self.container.winLossFilter(self.result);
-
-					if (!roleFilter(match) || !winLossFilter(match)) {
-						continue;
-					}
-
+			var heroes = {};
+			var type = self.container.types[self.type];
+			self.container.filteredData(true, self.role, self.result, 
+				function(user, match) {
 					if (!heroes[match.hero]) {
 						heroes[match.hero] = [];
 					}
-					heroes[match.hero].push(self.container.types[self.type].calc(match));
+					heroes[match.hero].push(type.calc(match));
+				},
+				function(user) {
+					for (var j in heroes) {
+						var hero = heroes[j];
+						if (hero.length >= self.minimum) {
+							var sum = type.sum(hero);
+							avg += sum;
+							result.push({user : user.id, hero : j, value : sum, count : hero.length}); 
+						}
+					};
+					heroes = {};
 				}
-				for (var j in heroes) {
-					if (heroes[j].length >= self.minimum) {
-						var sum = self.container.types[self.type].sum(heroes[j]);
-						avg += sum;
-						result.push({user : user.id, hero : j, value : sum, count : heroes[j].length}); 
-					}
-				}
-			}
+			);	
+
 			avg = avg / result.length;
 
-			for (var j in result) {
-				var r = result[j];
-				r.weighted = (r.count / (r.count + self.minimum)) * r.value + (self.minimum / (r.count + self.minimum)) * avg;
-			}
+			result.forEach(function(row) {
+				row.weighted = (row.count / (row.count + self.minimum)) * row.value + (self.minimum / (row.count + self.minimum)) * avg;
+			});
 
 			result.sort(function(a, b) {
 				return b.weighted - a.weighted;

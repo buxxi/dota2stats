@@ -67,26 +67,19 @@ define(["tooltip", "jquery", "datgui", "flot", "flotgantt"], function(Tooltip) {
 
 		this.getFilteredData = function() {
 			var data = [];
-			for (var i in self.container.unfilteredData) {
-				var user = self.container.unfilteredData[i];
-				if (!self.container.players[user.id].show) {
-					continue;
-				}
 
-				var type = self.container.types[self.type];
-				var result = [];
+			var type = self.container.types[self.type];
+			var result = [];
 
-				user.matches.sort(function(a, b) {
-					return Date.parse(a.datetime) - Date.parse(b.datetime);
-				});
-				var from;
-				var count = 0;
-				var j = 0;
-				var matchdate;				
 
-				for (var k in user.matches) {
-					j = k;
-					var match = user.matches[j];
+			var from;
+			var count = 0;
+			var i = 0;
+			var j = 0;
+			var matchdate;	
+
+			self.container.filteredData(true, "all", "all", 
+				function(user, match) {				
 					matchdate = match.datetime;
 					var value = type.sum([type.calc(match)]);
 					if (value < self.min || value > self.max) {
@@ -100,14 +93,19 @@ define(["tooltip", "jquery", "datgui", "flot", "flotgantt"], function(Tooltip) {
 					} else {
 						count++;
 					}
-				}
-				if (count > self.minStreak) {
-					result.push([from, self.container.unfilteredData.length - i, j, count]);
-				}
+					j++;			
+				}, 
+				function (user) {
+					if (count > self.minStreak) {
+						result.push([from, self.container.unfilteredData.length - i, j, count]);
+					}
 
-				var color = self.container.players[user.id].color;
-				data.push({data: result, label: user.name, color: color});
-			}
+					var color = self.container.players[user.id].color;
+					data.push({data: result, label: user.name, color: color});
+					i++;
+					j = 0;
+				}
+			);
 
 			return data;
 		}
