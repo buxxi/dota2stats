@@ -83,7 +83,7 @@ define("herostats", ["jquery", "datgui", "tablesorter"], function() {
 				$("#table table tbody").append("<tr>" + 
 					"<td>" + pos++ + "</td>" + 
 					playerTD(stat.user) +
-					"<td>" + stat.hero + "</td>" + 
+					heroTD(stat.hero) + 
 					"<td>" + stat.count + "</td>" +
 					"<td title='weighted: " + stat.weighted + "'>" + self.container.types[self.type].format(stat.value) + "</td>" +
 					"<td class='linkcol'><a href='" + self.dotabuffLink(stat.user, stat.hero) + "'><img src='img/dotabuff.ico'/></a></td>" +
@@ -97,6 +97,14 @@ define("herostats", ["jquery", "datgui", "tablesorter"], function() {
 				return "<td></td>";
 			}
 			return "<td style='background-color :" + self.container.players[userid].color +"'>" + self.container.players[userid].name + "</td>";
+		}
+
+		function heroTD(hero) {
+			if (!hero) {
+				return "<td></td>";
+			}
+			var url = hero.toLowerCase().replace(/[^A-Za-z]/g,"");
+			return "<td class='hero' style='background-image : url(img/heroes/" + url + ".png)'>" + hero + "</td>";
 		}
 	};
 });
