@@ -3,6 +3,8 @@ import json
 import MySQLdb
 import urllib2
 import sys
+import re
+import os
 from contextlib import closing
 from datetime import datetime
 from cgi import parse_qs, escape
@@ -13,6 +15,7 @@ MATCHES_URL = 		'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V0
 MATCHES_NEXT_URL = 	'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?key=%s&account_id=%s&start_at_match_id=%s'
 HEROES_URL = 		'https://api.steampowered.com/IEconDOTA2_570/GetHeroes/v0001/?key=%s&language=en_us'
 NAME_URL = 		'https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?steamids=%s&key=%s'
+IMAGE_PATH = 		'http://cdn.dota2.com/apps/dota2/images/heroes/%s_sb.png'
 
 class HeroInfo:
 	def __init__(self, cursor):
@@ -49,7 +52,7 @@ class HeroInfo:
 					self.roles[hero[0]] += [self.all_roles[i].title()]
 
 
-	def update(self, jsonpath):
+	def update(self, jsonpath, imagepath):
 		heroes = {}
 		data = json.loads(urllib2.urlopen(HEROES_URL % dotaconfig.API_KEY).read())
 		for x in data["result"]["heroes"]:
@@ -61,13 +64,32 @@ class HeroInfo:
 				name = hero_info[key]['name']
 				roles = hero_info[key]['roles'] + [hero_info[key]['atk']]
 				self.update_hero(heroes[name], name, [item.lower() for item in roles])
+
+		for x in data["result"]["heroes"]:
+			self.save_hero_image(imagepath, x)
+
 	def update_hero(self, id, name, roles):
 		parameters = ["carry" in roles, "disabler" in roles, "durable" in roles, "escape" in roles, "initiator" in roles, "jungler" in roles, "lanesupport" in roles, "nuker" in roles, "pusher" in roles, "support" in roles, "melee" in roles, "ranged" in roles, id]
 		parameters = [name] + [str(p).lower() for p in parameters]		
 
-		affected_rows = self.cursor.execute("UPDATE heroes SET name = %s, carry = %s, disabler = %s, durable = %s, escape = %s, initiator = %s, jungler = %s, lanesupport = %s, nuker = %s, pusher = %s, support = %s, melee = %s, ranged = %s WHERE heroid = %s", parameters)
-		if affected_rows == 0:
+		self.cursor.execute("SELECT heroid from heroes where heroid = %s", [id])
+
+		if self.cursor.rowcount == 0:
 			self.cursor.execute("INSERT INTO heroes(name,carry,disabler,durable,escape,initiator,jungler,lanesupport,nuker,pusher,support,melee,ranged,heroid) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", parameters)	
+		else:
+			self.cursor.execute("UPDATE heroes SET name = %s, carry = %s, disabler = %s, durable = %s, escape = %s, initiator = %s, jungler = %s, lanesupport = %s, nuker = %s, pusher = %s, support = %s, melee = %s, ranged = %s WHERE heroid = %s", parameters)	
+
+	def save_hero_image(self, imagepath, hero):
+		extname = re.search("npc_dota_hero_(.*)", hero["name"]).group(1)
+		extpath = IMAGE_PATH % (extname)
+		intname = re.sub("[^A-Za-z]","",hero["localized_name"]).lower()
+		intpath = os.path.join(imagepath, intname) + ".png"
+
+		img = urllib2.urlopen(extpath)
+		output = open(intpath,'wb')
+		output.write(img.read())
+		output.close()
+		
 
 class MatchFetcher:
 	def __init__(self, cursor):
@@ -242,7 +264,7 @@ if  __name__ =='__main__':
 	with closing(conn_db()) as conn:
 		with closing(conn.cursor()) as cursor:
 			if sys.argv[1] == "--update-heroes":
-				HeroInfo(cursor).update(sys.argv[2])
+				HeroInfo(cursor).update(sys.argv[2], sys.argv[3])
 			elif sys.argv[1] == "--load-matches":
 				[user.fetch() for user in load_users(cursor)]
 	

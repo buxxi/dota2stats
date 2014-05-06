@@ -2,6 +2,14 @@ dota2stats
 ==========
 A statistics page in javascript, python and mysql for tracking progress of a few number of players in dota2.
 
+#### installation
+1. Deploy the files to a new folder in the document root of your apache
+2. Add dotaconfig.py to your python path
+3. Create the database described below
+4. Add users to the users-table manually
+5. Run ```python py/data.py --update-heroes heroes.json img/heroes``` from the newly deployed folder to update heroes and download hero portraits
+6. Run (or add to cron for daily updates) ```python py/data.py --load-matches``` every time you want to fetch newly played matches for the players (use absolute paths)
+
 #### sql tables
 ```sql
 CREATE TABLE `matches` ( 
