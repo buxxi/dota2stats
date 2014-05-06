@@ -197,9 +197,8 @@ class DotaUser:
 		self.outputter = MatchOutputter(cursor, HeroInfo(cursor))
 
 	def fetch(self):
-		if self.should_update():
-			self.load_name()
-			self.fetcher.load_new_matches(self.userid)
+		self.load_name()
+		self.fetcher.load_new_matches(self.userid)
 		
 	def output(self):
 		return {
@@ -210,10 +209,6 @@ class DotaUser:
 
 	def name(self):
 		self.cursor.execute("SELECT name FROM users WHERE userid = %s", [self.userid])
-		return self.cursor.fetchone()[0]
-
-	def should_update(self):
-		self.cursor.execute("SELECT COUNT(1) FROM users WHERE userid = %s and updated < NOW() - INTERVAL 1 DAY", [self.userid])
 		return self.cursor.fetchone()[0]
 
 	def load_name(self):
@@ -227,7 +222,6 @@ def application(environ, start_response):
 	with closing(conn_db()) as conn:
 		with closing(conn.cursor()) as cursor:	
 			users = load_users(cursor)
-			[user.fetch() for user in users]	
 
 			content = json.dumps([user.output() for user in users], indent=4)
 
