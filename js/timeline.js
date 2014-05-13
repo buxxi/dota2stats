@@ -25,7 +25,6 @@ define("timeline", ["tooltip","jquery", "datgui", "flot", "flotselect", "flottim
 				var f = gui.addFolder(self.container.players[i].name);
 				f.add(players[i],'show').onFinishChange(self.draw);
 				f.addColor(players[i],'color').onChange(self.draw);
-				f.open();
 			}
 			return gui;
 		};

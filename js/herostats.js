@@ -19,7 +19,6 @@ define("herostats", ["jquery", "datgui", "tablesorter"], function() {
 				var f = gui.addFolder(self.container.players[i].name);
 				f.add(self.container.players[i],'show').onFinishChange(self.draw);
 				f.addColor(self.container.players[i],'color').onChange(self.draw);
-				f.open();
 			}
 			return gui;
 		};
