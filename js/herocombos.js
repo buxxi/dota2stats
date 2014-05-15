@@ -4,8 +4,8 @@ define(["jquery", "datgui", "tablesorter"], function() {
 		self.container = DataContainer;
 		self.type = "win-ratio";
 		self.result = "";
-		self.minimumGames = 1;
-		self.minimumPlayers = 1;
+		self.minimumGames = 2;
+		self.minimumPlayers = 2;
 		self.maximumPlayers = 5;
 		self.exclusive = false;
 
@@ -83,6 +83,8 @@ define(["jquery", "datgui", "tablesorter"], function() {
 
 
 			for (var j in matches) {
+				matches[j].heroes.sort();
+				
 				if (self.exclusive) {
 					addMatch(matches[j].heroes, matches[j].value);
 				} else {

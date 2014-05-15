@@ -101,7 +101,7 @@ define("totals", ["jquery", "datgui"], function() {
 		}
 
 		function showType(type) {
-			return !(type.contains("/min") || type.contains("/death") || type.contains("-ratio")); //TODO: make this nicer
+			return !(type.indexOf("/min") != -1 || type.indexOf("/death") != -1 || type.indexOf("-ratio") != -1); //TODO: make this nicer
 
 		}
 	};
