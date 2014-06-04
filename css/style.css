@@ -197,7 +197,7 @@ html, body {
     content: "";
     display: block;
     height: 15px;
-    left: 350px;
+    left: calc(20% - 30px);
     margin-top: -22px;
     outline: 2px solid #1A1A1A;
     position: absolute;
@@ -206,7 +206,7 @@ html, body {
 
 .folder .closed li.boolean input {
     position : absolute;
-    left: 320px;
+    left: calc(20% - 60px);
     margin-top: -21px;
 }
 
