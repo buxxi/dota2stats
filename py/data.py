@@ -131,10 +131,18 @@ class MatchFetcher:
 
 		if data["lobby_type"] != 0 and data["lobby_type"] != 7:
 			raise Exception("Game was not a public or ranked matchmaking game")
+		if data["human_players"] != 10:
+			raise Exception("Game does not contain 10 players")
+		if data["duration"] < 600:
+			raise Exception("Game was too short")
+		for x in data["players"]:
+			if x["level"] == 0:
+				raise Exception("Game contains a player who didn't join")
 
 		pdata = {}
 		total_radiant_kills = 0
 		total_dire_kills = 0
+		max_level = 0
 		for x in data["players"]:
 			if x["account_id"] == userid:
 				pdata = x
@@ -142,16 +150,19 @@ class MatchFetcher:
 				total_radiant_kills += x["kills"]
 			else:
 				total_dire_kills += x["kills"]
+			max_level = max(max_level, x["level"])
 
 		timestamp = datetime.fromtimestamp(data["start_time"]).isoformat()
 		radiant = pdata["player_slot"] <= 4
 		won = radiant == data["radiant_win"]
-
+		captain = 'radiant_captain' in data and 'dire_captain' in data and (data['radiant_captain'] == userid or data['dire_captain'] == userid)
+		
 		total_kills = total_radiant_kills if radiant else total_dire_kills
 		total_deaths = total_dire_kills if radiant else total_radiant_kills
+		
+		parameters = [matchid, userid, pdata["hero_id"], timestamp, data["duration"], pdata["kills"], pdata["deaths"], pdata["assists"], pdata["level"], pdata["gold"] + pdata["gold_spent"], pdata["last_hits"], pdata["denies"], pdata["xp_per_min"], pdata["gold_per_min"], str(won), str(radiant), total_kills, total_deaths, str(captain), max_level, pdata["hero_damage"], pdata["tower_damage"], data["game_mode"] ]
 
-		parameters = [matchid, userid, pdata["hero_id"], timestamp, data["duration"], pdata["kills"], pdata["deaths"], pdata["assists"], pdata["level"], pdata["gold"] + pdata["gold_spent"], pdata["last_hits"], pdata["denies"], pdata["xp_per_min"], pdata["gold_per_min"], str(won), str(radiant), total_kills, total_deaths ]
-		self.cursor.execute("INSERT INTO matches(matchid,userid,heroid,datetime,duration,kills,deaths,assists,level,gold,lasthits,denies,xp_min,gold_min,won,radiant,total_kills,total_deaths) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", parameters)	
+		self.cursor.execute("INSERT INTO matches(matchid,userid,heroid,datetime,duration,kills,deaths,assists,level,gold,lasthits,denies,xp_min,gold_min,won,radiant,total_kills,total_deaths,captain,max_level,hero_damage,tower_damage,game_mode) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", parameters)	
 
 	def has_match(self, userid, matchid):
 		self.cursor.execute("SELECT COUNT(1) FROM matches WHERE userid = %s and matchid = %s", [userid, matchid])
@@ -171,7 +182,7 @@ class MatchOutputter:
 		return {
 			'matchid': row["matchid"],
 			'hero': self.hero_info.get_name(row["heroid"]),
-			'roles': self.hero_info.get_roles(row["heroid"]),
+			'roles': self.hero_info.get_roles(row["heroid"]) + (["Captain"] if row["captain"] == "true" else []),
 			'radiant': row["radiant"] == "true",
 			'won': row["won"] == "true",
 			'level': row["level"],
@@ -186,7 +197,11 @@ class MatchOutputter:
 			'datetime': row["datetime"].isoformat(),
 			'duration': row["duration"],
 			'total_kills' : row["total_kills"],
-			'total_deaths' : row["total_deaths"]
+			'total_deaths' : row["total_deaths"],
+			'captain' : row["captain"] == "true",
+			'max_level' : row["max_level"],
+			'hero_damage' : row["hero_damage"],
+			'tower_damage' : row["tower_damage"]
 		}
 
 class DotaUser:

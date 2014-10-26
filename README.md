@@ -31,6 +31,11 @@ CREATE TABLE `matches` (
   `radiant` enum('true','false') NOT NULL,
   `total_kills` int(11) NOT NULL,
   `total_deaths` int(11) NOT NULL,
+  `captain` enum('true','false') DEFAULT NULL,
+  `max_level` int(11) DEFAULT NULL,
+  `hero_damage` int(11) DEFAULT NULL,
+  `tower_damage` int(11) DEFAULT NULL,
+  `game_mode` int(11) DEFAULT NULL,
   PRIMARY KEY (`matchid`,`userid`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
 

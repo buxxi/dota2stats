@@ -63,8 +63,8 @@ require(["timeline", "herostats", "teamstats", "herocombos", "records", "totals"
 
 	function buildMenu(data) {
 		var li = menuItem("Timeline", "timeline", new Timeline(data));
-		var li2 = menuItem("Team stats", "teamstats", new TeamStats(data));
-		var li3 = menuItem("Hero stats", "herostats", new HeroStats(data));
+		var li2 = menuItem("Teams", "teamstats", new TeamStats(data));
+		var li3 = menuItem("Heroes", "herostats", new HeroStats(data));
 		var li4 = menuItem("Records", "records", new Records(data));
 		var li5 = menuItem("Totals", "totals", new Totals(data));
 		var li6 = menuItem("Hero combos", "herocombos", new HeroCombos(data));

@@ -67,6 +67,12 @@ define("data-container", ["jquery", "palette"], function() {
 				sum : normalSum,
 				teamRelevant : true
 			},
+			"maxlevel-diff" : {
+				calc : function(node) { return node.max_level - node.level; },
+				format : normalFormat,
+				sum : normalSum,
+				teamRelevant : true
+			},
 			"radiant-ratio":  { 
 				calc : function(node) { return node.radiant ? 100 : 0; }, 
 				format : percentFormat,
@@ -138,8 +144,19 @@ define("data-container", ["jquery", "palette"], function() {
 				format : normalFormat,
 				sum : normalSum,
 				teamRelevant : false
+			},
+			"hero-damage": {
+				calc : function(node) { return node.hero_damage; },
+				format : normalFormat,
+				sum : normalSum,
+				teamRelevant : false
+			},
+			"tower-damage": {
+				calc : function(node) { return node.tower_damage; },
+				format : normalFormat,
+				sum : normalSum,
+				teamRelevant : false
 			}
-			
 		};
 
 		self.load = function(callback) {
