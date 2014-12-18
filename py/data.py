@@ -1,10 +1,11 @@
+import os, sys
+sys.path.append(os.path.dirname(__file__))
+
 import dotaconfig
 import json
 import MySQLdb
 import urllib2
-import sys
 import re
-import os
 from contextlib import closing
 from datetime import datetime
 from cgi import parse_qs, escape
