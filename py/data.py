@@ -3,7 +3,8 @@ sys.path.append(os.path.dirname(__file__))
 
 import dotaconfig
 import json
-import MySQLdb
+import pymysql
+import argparse
 import urllib2
 import re
 from contextlib import closing
@@ -15,7 +16,7 @@ MATCH_URL = 		'https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001
 MATCHES_URL = 		'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?key=%s&account_id=%s'
 MATCHES_NEXT_URL = 	'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?key=%s&account_id=%s&start_at_match_id=%s'
 HEROES_URL = 		'https://api.steampowered.com/IEconDOTA2_570/GetHeroes/v0001/?key=%s&language=en_us'
-NAME_URL = 		'https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?steamids=%s&key=%s'
+NAME_URL = 			'https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?steamids=%s&key=%s'
 IMAGE_PATH = 		'http://cdn.dota2.com/apps/dota2/images/heroes/%s_sb.png'
 
 class HeroInfo:
@@ -247,8 +248,7 @@ def application(environ, start_response):
 			return [content]
 	
 def conn_db():
-	conn = MySQLdb.connect (host = dotaconfig.SQL_HOST, user = dotaconfig.SQL_USER, passwd = dotaconfig.SQL_PASSWORD, db = dotaconfig.SQL_DB, charset='utf8', use_unicode = True)
-	conn.autocommit(True)	
+	conn = pymysql.connect (host = dotaconfig.SQL_HOST, user = dotaconfig.SQL_USER, passwd = dotaconfig.SQL_PASSWORD, db = dotaconfig.SQL_DB, charset='utf8', use_unicode = True, autocommit = True)
 	return conn
 
 def load_users(cursor):
@@ -273,18 +273,12 @@ def make_dict(row, cursor):
 if  __name__ =='__main__':
 	with closing(conn_db()) as conn:
 		with closing(conn.cursor()) as cursor:
-			if sys.argv[1] == "--update-heroes":
-				HeroInfo(cursor).update(sys.argv[2], sys.argv[3])
-			elif sys.argv[1] == "--load-matches":
+			parser = argparse.ArgumentParser(description = "Updates the database for the dota2 stats")
+			group = parser.add_mutually_exclusive_group(required=True)
+			group.add_argument("--update-heroes", nargs=2, metavar = ("jsonpath", "imagepath"), help = "Updates the hero metadata and images")
+			group.add_argument("--load-matches", action="store_true", help = "Loads new matches for the active players")
+			args = parser.parse_args()
+			if args.update_heroes:
+				HeroInfo(cursor).update(args.update_heroes[0], args.update_heroes[1])
+			elif args.load_matches:
 				[user.fetch() for user in load_users(cursor)]
-	
-	
-		
-
-		
- 
-
-
-
-
-

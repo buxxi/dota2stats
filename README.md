@@ -77,5 +77,5 @@ CREATE TABLE `heroes` (
 * chroma-palette
 
 #### python dependencies
-* MySQLdb
+* pymysql
 
